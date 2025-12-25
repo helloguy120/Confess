@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Admin Panel</title>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<!-- Encryption -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+
+<style>
+body {
+    background: #000;
+    color: #fff;
+    font-family: Arial, sans-serif;
+    padding: 20px;
+}
+textarea {
+    width: 100%;
+    height: 120px;
+    margin-bottom: 15px;
+    background: #111;
+    color: #fff;
+    border: 1px solid #333;
+    padding: 10px;
+}
+input, button {
+    padding: 8px;
+    margin-bottom: 15px;
+}
+</style>
+</head>
+
+<body>
+
+<h2>Admin Panel</h2>
+
+<input type="password" id="key" placeholder="Enter admin secret key">
+<br>
+<button onclick="loadConfessions()">Load Confessions</button>
+
+<div id="output"></div>
+
+<script>
+// 🔥 SAME FIREBASE CONFIG AS index.html
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT.firebaseapp.com",
+  projectId: "YOUR_PROJECT_ID"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+function loadConfessions() {
+    const key = document.getElementById("key").value;
+    if (!key) {
+        alert("Enter admin key");
+        return;
+    }
+
+    db.collection("confessions").orderBy("time", "desc").get()
+    .then(snapshot => {
+        let html = "";
+        snapshot.forEach(doc => {
+            const decrypted = CryptoJS.AES.decrypt(
+                doc.data().data,
+                key
+            ).toString(CryptoJS.enc.Utf8);
+
+            html += `<textarea readonly>${decrypted || "Wrong key"}</textarea>`;
+        });
+        document.getElementById("output").innerHTML = html;
+    });
+}
+</script>
+
+</body>
+</html>
