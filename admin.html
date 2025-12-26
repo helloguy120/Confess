@@ -1,26 +1,51 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Panel</title>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js"></script>
+
+  <!-- Firebase Config -->
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBG5Z71bIS4HA-0y5477uDKCxHgDkWaO_I",
+      authDomain: "jntuhconfess2k25.firebaseapp.com",
+      projectId: "jntuhconfess2k25",
+      storageBucket: "jntuhconfess2k25.firebasestorage.app",
+      messagingSenderId: "1003331591998",
+      appId: "1:1003331591998:web:5c0ad9cc6983896953166f",
+      measurementId: "G-BRQ8J8MHTK"
+    };
+
+    const app = firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const auth = firebase.auth();
+  </script>
+
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <h1>Admin Panel</h1>
 
-<div class="container">
-  <h2>Admin Login</h2>
-  <input type="password" id="password" placeholder="Enter admin password">
-  <button onclick="login()">Login</button>
+  <div id="loginDiv">
+    <input type="email" id="email" placeholder="Email" required>
+    <input type="password" id="password" placeholder="Password" required>
+    <button id="loginBtn">Login</button>
+    <p id="loginMessage"></p>
+  </div>
 
-  <div id="adminPanel" style="display:none;">
-    <h3>All Confessions</h3>
-
-    <button onclick="exportConfessions()">Export Confessions</button>
-    <button onclick="clearConfessions()" class="danger">Clear All</button>
-
+  <div id="adminDiv" style="display:none;">
+    <button id="logoutBtn">Logout</button>
+    <button id="clearBtn">Delete All Confessions</button>
+    <button id="exportBtn">Export Confessions</button>
     <ul id="confessionList"></ul>
   </div>
-</div>
 
-<script src="admin.js"></script>
+  <script src="admin.js"></script>
 </body>
 </html>
