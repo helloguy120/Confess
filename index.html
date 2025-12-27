@@ -125,11 +125,11 @@
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
-import { getFirestore, collection, doc, setDoc, serverTimestamp }
+import { getFirestore, collection, doc, setDoc, serverTimestamp } 
 from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
-/* 🔴🔴🔴 MANUAL CONTROL 🔴🔴🔴 */
-const OPEN = true; // true = open, false = closed
+/* MANUAL OPEN/CLOSE CONTROL */
+const OPEN = true; // true=open, false=closed
 
 const firebaseConfig = {
   apiKey: "AIzaSyBG5Z71bIS4HA-0y5477uDKCxHgDkWaO_I",
@@ -170,11 +170,12 @@ form.addEventListener("submit", async (e) => {
   status.innerText = "Encrypting & sending...";
 
   try {
-    // Create timestamp ID: DDMM-HHMMSS
+    // 🔹 Create ID: DDMM-HHMMSS
     const now = new Date();
-    const id = `${now.getDate().toString().padStart(2,'0')}${(now.getMonth()+1).toString().padStart(2,'0')}-${now.getHours().toString().padStart(2,'0')}${now.getMinutes().toString().padStart(2,'0')}${now.getSeconds().toString().padStart(2,'0')}`;
+    const docID = `${now.getDate().toString().padStart(2,'0')}${(now.getMonth()+1).toString().padStart(2,'0')}-${now.getHours().toString().padStart(2,'0')}${now.getMinutes().toString().padStart(2,'0')}${now.getSeconds().toString().padStart(2,'0')}`;
 
-    await setDoc(doc(db, "confessions", id), {
+    const docRef = doc(db, "confessions", docID); // Correctly create doc with ID
+    await setDoc(docRef, {
       text: text,
       createdAt: serverTimestamp()
     });
@@ -183,8 +184,7 @@ form.addEventListener("submit", async (e) => {
     status.classList.add("success");
     textInput.value = "";
 
-    // Reload page to reflect OPEN/closed status
-    setTimeout(() => location.reload(), 800);
+    setTimeout(() => location.reload(), 800); // reload page
 
   } catch (err) {
     console.error(err);
