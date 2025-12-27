@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Admin Panel</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+  background: #000;
+  color: #eee;
+  font-family: system-ui, sans-serif;
+  padding: 20px;
+}
+input, button {
+  width: 100%;
+  margin: 8px 0;
+  padding: 12px;
+  border-radius: 8px;
+  border: none;
+}
+button {
+  background: #00ffd5;
+  color: #000;
+  font-weight: 600;
+}
+.confession {
+  background: #111;
+  padding: 12px;
+  margin: 10px 0;
+  border-radius: 10px;
+}
+small {
+  color: #777;
+}
+</style>
+</head>
+
+<body>
+
+<h2>Admin Login</h2>
+
+<div id="loginBox">
+  <input type="email" id="email" placeholder="Admin email">
+  <input type="password" id="password" placeholder="Password">
+  <button onclick="login()">Login</button>
+  <p id="loginStatus"></p>
+</div>
+
+<div id="adminBox" style="display:none;">
+  <h2>Confessions</h2>
+  <button onclick="loadConfessions()">Refresh</button>
+  <button onclick="clearAll()">Clear All</button>
+  <div id="confessions"></div>
+</div>
+
+<!-- Firebase compat -->
+<script src="https://www.gstatic.com/firebasejs/12.7.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.7.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore-compat.js"></script>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyBG5Z71bIS4HA-0y5477uDKCxHgDkWaO_I",
+  authDomain: "jntuhconfess2k25.firebaseapp.com",
+  projectId: "jntuhconfess2k25",
+  storageBucket: "jntuhconfess2k25.firebasestorage.app",
+  messagingSenderId: "1003331591998",
+  appId: "1:1003331591998:web:5c0ad9cc6983896953166f"
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+function login() {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  auth.signInWithEmailAndPassword(email, password)
+    .then(() => {
+      document.getElementById("loginBox").style.display = "none";
+      document.getElementById("adminBox").style.display = "block";
+      loadConfessions();
+    })
+    .catch(err => {
+      document.getElementById("loginStatus").innerText = err.message;
+    });
+}
+
+function loadConfessions() {
+  const box = document.getElementById("confessions");
+  box.innerHTML = "";
+
+  db.collection("confessions")
+    .orderBy("timestamp", "desc")
+    .get()
+    .then(snapshot => {
+      snapshot.forEach(doc => {
+        const d = doc.data();
+        const div = document.createElement("div");
+        div.className = "confession";
+        div.innerHTML = `
+          <p>${d.text}</p>
+          <small>${d.timestamp?.toDate()}</small><br>
+          <button onclick="deleteOne('${doc.id}')">Delete</button>
+        `;
+        box.appendChild(div);
+      });
+    });
+}
+
+function deleteOne(id) {
+  db.collection("confessions").doc(id).delete()
+    .then(loadConfessions);
+}
+
+function clearAll() {
+  if (!confirm("Delete all confessions?")) return;
+  db.collection("confessions").get().then(snapshot => {
+    snapshot.forEach(doc => doc.ref.delete());
+    loadConfessions();
+  });
+}
+</script>
+
+</body>
+</html>
