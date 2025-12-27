@@ -6,92 +6,102 @@
 <title>Anonymous Confession</title>
 
 <style>
-  * {
-    box-sizing: border-box;
-  }
+  * { box-sizing: border-box; }
 
   body {
     margin: 0;
-    padding: 20px;
-    background: #0d0f12;
-    color: #e6e6e6;
+    min-height: 100vh;
+    background: radial-gradient(circle at top, #111, #000);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: #eaeaea;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
   }
 
   .container {
     width: 100%;
     max-width: 520px;
-    margin: 40px auto;
-    background: #121417;
-    border-radius: 14px;
-    padding: 22px;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+    background: #0f1114;
+    border-radius: 16px;
+    padding: 26px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+    text-align: center;
   }
 
   h1 {
     font-size: 18px;
     font-weight: 500;
-    text-align: center;
-    margin: 0 0 10px 0;
-    letter-spacing: 0.4px;
+    margin-bottom: 8px;
+    letter-spacing: 0.5px;
   }
 
   p.note {
     font-size: 13px;
     color: #9aa0a6;
-    text-align: center;
-    margin: 0 0 16px 0;
-  }
-
-  form {
-    display: block;
+    margin-bottom: 18px;
   }
 
   textarea {
-    display: block;
     width: 100%;
-    min-height: 150px;
-    background: #0b0d10;
+    min-height: 160px;
+    background: #090b0e;
     border: 1px solid #222;
-    border-radius: 10px;
-    color: #f1f1f1;
-    padding: 12px;
+    border-radius: 12px;
+    color: #f5f5f5;
+    padding: 14px;
     font-size: 14px;
-    resize: vertical;
+    resize: none;
     outline: none;
-  }
-
-  textarea::placeholder {
-    color: #666;
+    text-align: left;
   }
 
   textarea:focus {
-    border-color: #3a3f45;
+    border-color: #555;
   }
 
   button {
-    display: block;
+    margin-top: 18px;
     width: 100%;
-    margin-top: 14px;
-    padding: 11px;
-    background: #1a1d21;
-    border: 1px solid #2a2f36;
-    border-radius: 10px;
-    color: #e6e6e6;
+    padding: 13px;
     font-size: 14px;
+    border: none;
+    border-radius: 12px;
     cursor: pointer;
+    color: #fff;
+    background: linear-gradient(135deg, #7f5cff, #ff5ca8, #111);
+    background-size: 200% 200%;
+    animation: gradientMove 6s ease infinite;
   }
 
-  button:active {
-    opacity: 0.85;
+  button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  @keyframes gradientMove {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
   }
 
   #status {
-    margin-top: 12px;
+    margin-top: 16px;
     font-size: 13px;
-    text-align: center;
+    min-height: 20px;
     color: #b0b6bb;
-    min-height: 18px;
+  }
+
+  /* Joy effect */
+  .success {
+    color: #7cffb2;
+    animation: pop 0.6s ease;
+  }
+
+  @keyframes pop {
+    0% { transform: scale(0.9); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
   }
 </style>
 </head>
@@ -100,11 +110,11 @@
 
 <div class="container">
   <h1>Anonymous Confession</h1>
-  <p class="note">No names. No tracking. Just words.</p>
+  <p class="note">No identity. No judgment. Just release.</p>
 
   <form id="confessionForm">
-    <textarea id="confessionText" placeholder="Write here..."></textarea>
-    <button type="submit">Submit</button>
+    <textarea id="confessionText" placeholder="Type what you carry inside..."></textarea>
+    <button type="submit" id="submitBtn">Release</button>
   </form>
 
   <div id="status"></div>
@@ -127,17 +137,19 @@ const db = getFirestore(app);
 const form = document.getElementById("confessionForm");
 const textInput = document.getElementById("confessionText");
 const status = document.getElementById("status");
+const btn = document.getElementById("submitBtn");
 
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
 
   const text = textInput.value.trim();
   if (!text) {
-    status.innerText = "Please write something.";
+    status.innerText = "Write something first.";
     return;
   }
 
-  status.innerText = "Sending securely...";
+  btn.disabled = true;
+  status.innerText = "Encrypting & sending...";
 
   try {
     await addDoc(collection(db, "confessions"), {
@@ -145,13 +157,17 @@ form.addEventListener("submit", async (e) => {
       createdAt: serverTimestamp()
     });
 
-    status.innerText = "Confession submitted.";
+    status.innerHTML = "✔ Confession released";
+    status.classList.add("success");
     textInput.value = "";
 
   } catch (err) {
     console.error(err);
     status.innerText = "Submission failed.";
   }
+
+  btn.disabled = false;
+  setTimeout(() => status.classList.remove("success"), 1000);
 });
 </script>
 
